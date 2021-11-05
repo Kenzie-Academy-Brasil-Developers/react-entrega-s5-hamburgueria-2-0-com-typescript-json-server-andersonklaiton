@@ -12,7 +12,7 @@ interface CartProps {
   children: ReactNode;
 }
 
-interface ProductData {
+interface ICartProduct {
   id: number;
   name: string;
   category: string;
@@ -23,25 +23,23 @@ interface ProductData {
   totValue: number;
 }
 
-interface CartProviderData {
+interface ICart {
   getCart: () => void;
-  cart: ProductData[];
-  addToCart: (item: ProductData) => void;
+  cart: ICartProduct[];
+  addToCart: (item: ICartProduct) => void;
   removeFromCart: (id: number) => void;
   removeAll: () => void;
-  upDateQuantityCart:(quantity:number, totValue: number, id:number)=>void
+  upDateQuantityCart: (quantity: number, totValue: number, id: number) => void;
 }
 
-export const CartContext = createContext<CartProviderData>(
-  {} as CartProviderData
-);
+export const CartContext = createContext<ICart>({} as ICart);
 
 export const CartProvider = ({ children }: CartProps) => {
   const { token, id } = useContext(AuthContext);
 
-  const [cart, setCart] = useState<ProductData[]>([] as ProductData[]);
+  const [cart, setCart] = useState<ICartProduct[]>([] as ICartProduct[]);
 
-  const addToCart = (item: ProductData) => {
+  const addToCart = (item: ICartProduct) => {
     let data = { ...item, userId: id };
 
     if (cart.every((items) => items.id !== item.id)) {
@@ -54,8 +52,7 @@ export const CartProvider = ({ children }: CartProps) => {
         .then(() => {
           getCart();
           toast.success("Produto adicionado ao Carrinho");
-        })
-        .catch(() => toast.error("Produto já adicionado no carrinho"));
+        });
     } else {
       toast.error("Produto já adicionado no carrinho");
     }
@@ -68,8 +65,7 @@ export const CartProvider = ({ children }: CartProps) => {
           Authorization: `Bearer ${token}`,
         },
       })
-      .then((response) => setCart(response.data))
-      
+      .then((response) => setCart(response.data));
   }, [id, token]);
 
   const removeFromCart = (id: number) => {
@@ -80,28 +76,60 @@ export const CartProvider = ({ children }: CartProps) => {
         },
       })
       .then((_) => {
+        if (cart.length > 0) {
+          setCart([]);
+          getCart();
+          toast.success("Itém removido do carrinho");
+        } else {
+          getCart();
+        }
+      })
+      .catch(() => {
         getCart();
-        toast.success("Itém removido do carrinho");
       });
   };
 
   const removeAll = () => {
     cart.map((item) => {
-      return removeFromCart(item.id), getCart();
+      api
+        .delete(`cart/${item.id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        .then((_) => {
+          if (cart.length > 0) {
+            setCart([]);
+            getCart();
+          } else {
+            getCart();
+          }
+        })
+        .catch(() => {
+          getCart();
+        });
     });
+    toast.success("Itens removidos do carrinho");
+    getCart();
   };
 
-  const upDateQuantityCart=(quantity: number, totValue: number, id:number)=>{
-
+  const upDateQuantityCart = (
+    quantity: number,
+    totValue: number,
+    id: number
+  ) => {
     api
-    .patch(`cart/${id}`,{quantity:quantity, totValue:totValue},{
-      headers:{
-        Authorization: `Bearer ${token}`
-      }
-    })
-    .then(()=> getCart())
-
-  }
+      .patch(
+        `cart/${id}`,
+        { quantity: quantity, totValue: totValue },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
+      .then(() => getCart());
+  };
 
   useEffect(() => {
     getCart();
@@ -109,7 +137,14 @@ export const CartProvider = ({ children }: CartProps) => {
 
   return (
     <CartContext.Provider
-      value={{ getCart, cart, addToCart, removeFromCart, removeAll,upDateQuantityCart }}
+      value={{
+        getCart,
+        cart,
+        addToCart,
+        removeFromCart,
+        removeAll,
+        upDateQuantityCart,
+      }}
     >
       {children}
     </CartContext.Provider>

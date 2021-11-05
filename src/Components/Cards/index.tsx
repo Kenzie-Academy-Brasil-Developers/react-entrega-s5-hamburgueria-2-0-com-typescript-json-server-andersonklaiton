@@ -1,5 +1,6 @@
 import { useContext } from "react";
 import { CartContext } from "../../Providers/Cart";
+import { ProductsContext } from "../../Providers/Products";
 import {
   Button,
   Container,
@@ -28,6 +29,7 @@ interface CardProductsProps {
 
 const CardsProducts = ({ item }: CardProductsProps) => {
   const { addToCart } = useContext(CartContext);
+  const {allProducts} = useContext(ProductsContext)
 
   return (
     <Container>
@@ -40,7 +42,7 @@ const CardsProducts = ({ item }: CardProductsProps) => {
         <PPrice>R$ {item.price},00</PPrice>
         <Button
           onClick={() =>
-            addToCart({ ...item, quantity: 1, totValue: item.price })
+            {addToCart({ ...item, quantity: 1, totValue: item.price }); allProducts()}
           }
         >
           Adicionar

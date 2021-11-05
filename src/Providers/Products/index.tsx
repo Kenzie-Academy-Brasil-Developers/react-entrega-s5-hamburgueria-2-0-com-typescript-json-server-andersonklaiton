@@ -14,13 +14,14 @@ interface ProductData {
   image: string;
 }
 
-interface ProductsProviderData {
+interface IProducts {
   products: ProductData[];
   filterProduct: (searchProduct: string) => void;
+  allProducts: ()=>void
 }
 
-export const ProductsContext = createContext<ProductsProviderData>(
-  {} as ProductsProviderData
+export const ProductsContext = createContext<IProducts>(
+  {} as IProducts
 );
 
 export const ProductsProvider = ({ children }: ProductsProps) => {
@@ -44,14 +45,14 @@ export const ProductsProvider = ({ children }: ProductsProps) => {
       setProducts(
         products.filter(
           (item) =>
-            item.name.toLocaleLowerCase() === searchProduct.toLocaleLowerCase()
+            item.name.toLocaleLowerCase().includes(searchProduct)
         )
       );
     }
   };
 
   return (
-    <ProductsContext.Provider value={{ products, filterProduct }}>
+    <ProductsContext.Provider value={{ products, filterProduct, allProducts }}>
       {children}
     </ProductsContext.Provider>
   );

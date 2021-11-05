@@ -41,6 +41,7 @@ export const ContainerCart = styled.div`
   min-height: 200px;
   background-color: #ffffff;
   border-radius: 5px;
+  top:80px;
 `;
 
 export const HeaderCart = styled.div`

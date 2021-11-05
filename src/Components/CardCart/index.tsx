@@ -18,7 +18,12 @@ import { AiOutlineClose } from "react-icons/ai";
 
 import ProductsCart from "../ProductsCart";
 
-const CardCart = ({ showCart, setShowCart }: any) => {
+interface ICardProps{
+  showCart:boolean,
+  setShowCart:any
+}
+
+const CardCart = ({ showCart, setShowCart }: ICardProps) => {
   const { cart, removeAll } = useContext(CartContext);
 
   const totValue = cart.reduce((acc, act) => acc + Number(act.totValue), 0);
@@ -36,7 +41,7 @@ const CardCart = ({ showCart, setShowCart }: any) => {
               <AiOutlineClose onClick={() => setShowCart(appearCart())} />
             </HeaderCart>
             <ContainerItens>
-              {cart.length <= 0 ? (
+              {cart.length === 0 ? (
                 <ContainerInfo>
                   <P1>Sua sacola está vazia</P1>
                   <P2>Adicione itens</P2>
